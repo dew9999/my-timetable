@@ -306,47 +306,47 @@
     
     const lectures_L3_GL = {
         L3: {
-            SUN_0830: { s: "TLSI", r: "Amphi?" }, // Row "TLSI" 08:30
-            MON_1130: { s: "AR", r: "Amphi?" },   // Row "S" ... AR
-            TUE_1130: { s: "DLI", r: "Amphi?" }   // Row "S" ... DLI
+            SUN_0830: { s: "TLSI", r: "Amphi?" }, 
+            SUN_1130: { s: "MEL", r: "S (Cours)" },   
+            MON_1130: { s: "AR", r: "S (Cours)" },   
+            TUE_1130: { s: "DLI", r: "S (Cours)" }   
         }
     };
 
     const data_L3_GL = {
         1: {
-            "SUN_1000": { s: "MEL", r: "S25" }, // G1/TD GL AR? No, G1/TD is Col 4.
-            // Re-reading Image for G1:
-            // Sun 10:00 Row S25: "G1/TD GL AR" -> Subject AR? Or MEL? 
-            // Wait, Row TP11 has "G3 GL MEL". Row S25 has "G1/TD GL AR".
-            // So G1 Sun 10:00 is TD AR in S25.
             "SUN_1000": { s: "AR (TD)", r: "S25" },
-            "SUN_1300": { s: "DLI (Cours/TD)", r: "S2" }, // Row S2: G1 GL DLI
-            "MON_0830": { s: "AR (TP)", r: "TP7" }, // Row TP7: G1/TP
-            "TUE_1000": { s: "MEL (TP)", r: "TP7" }, // Row TP7: G1/TP MEL
+            "SUN_1300": { s: "DLI (TD)", r: "S2" }, 
+            "MON_0830": { s: "AR (TP)", r: "TP7" }, 
+            "TUE_1000": { s: "MEL (TP)", r: "TP7" },
             "WED_0830": { s: "Atelier 1", r: "S2" },
             "WED_1000": { s: "Atelier 1", r: "S2" }
         },
         2: {
-            "SUN_0830": { s: "DLI (TD)", r: "S25" }, // Row S25: G2/TD GL DLI
-            "SUN_1300": { s: "AR (TD)", r: "S26" },  // Row S26: G2 GL/TD AR
-            "SUN_1430": { s: "MEL (TP)", r: "TP11" }, // Row TP11: G2 GL AR/TP? No, text says G2 GL AR/TP?
-            // Actually Row TP11 14:30 says "G2 GL AR/TP". Wait, AR or MEL?
-            // Row S25 13:00 says "G4 GL/TP MEL".
-            // Let's assume the text in cell is [Group] [Specialty] [Module].
-            // So "G2 GL AR/TP" = G2, GL Specialty, AR Module, TP.
-            "SUN_1430": { s: "AR (TP)", r: "TP11" },
-            "TUE_0830": { s: "MEL (TP)", r: "TP7" }, // Row TP7: G2/TP GL MEL
+            "SUN_0830": { s: "DLI (TD)", r: "S25" }, 
+            "SUN_1300": { s: "AR (TD)", r: "S26" },  
+            "SUN_1430": { s: "AR (TP)", r: "TP11" }, 
+            "TUE_0830": { s: "MEL (TP)", r: "TP7" }, 
             "WED_0830": { s: "Atelier 2", r: "S25" },
             "WED_1000": { s: "Atelier 2", r: "S25" }
         },
         3: {
-            "SUN_1000": { s: "MEL (TP)", r: "TP11" }, // Row TP11: G3 GL MEL
-            "SUN_1300": { s: "GL (TD)", r: "TP11" },  // Row TP11: G3 GL
-            "SUN_1430": { s: "AR (TD)", r: "S26" },   // Row S26: G3 GL AR/TD
-            "TUE_0830": { s: "DLI (Cours/TD)", r: "S2" }, // Row S2: G3 GL DLI
+            "SUN_1000": { s: "MEL (TP)", r: "TP11" }, 
+            "SUN_1300": { s: "AR (TP)", r: "TP11" },  
+            "SUN_1430": { s: "AR (TD)", r: "S26" },   
+            "TUE_0830": { s: "DLI (TD)", r: "S2" }, 
             "WED_0830": { s: "Atelier 3", r: "S26" },
             "WED_1000": { s: "Atelier 3", r: "S26" }
         },
+        4: {
+            "SUN_1300": { s: "MEL (TP)", r: "S25" }, 
+            "SUN_1430": { s: "DLI (TD)", r: "S2" }, 
+            "MON_0830": { s: "AR (TD)", r: "S26" },   
+            "MON_1000": { s: "AR (TP)", r: "TP7" },   
+            "WED_0830": { s: "Atelier 4", r: "TP7" },
+            "WED_1000": { s: "Atelier 4", r: "TP7" }
+        }
+    };
         4: {
             "SUN_1300": { s: "MEL (TP)", r: "S25" }, // Row S25: G4 GL/TP MEL
             "SUN_1430": { s: "DLI (Cours/TD)", r: "S2" }, // Row S2: G4 GL DLI
