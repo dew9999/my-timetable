@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Timetable - Groups 1-12</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        h1 { margin: 0; color: #d35400; font-size: 28px; font-family: 'Brush Script MT', cursive; }
+        h2 { margin: 10px 0 5px; color: #34495e; font-size: 20px; }
+        h3 { margin: 0; color: #7f8c8d; font-weight: normal; }
+        
+        .controls {
+            text-align: center;
+            margin-bottom: 25px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        select {
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 2px solid #3498db;
+            color: #2c3e50;
+            cursor: pointer;
+            outline: none;
+            font-weight: bold;
+        }
+        select:hover { border-color: #2980b9; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 2px solid #333;
+            padding: 15px;
+            text-align: center;
+            vertical-align: middle;
+            width: 16%;
+        }
+        th {
+            background-color: #fff;
+            color: #c0392b; /* Red header text */
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            text-align: left;
+            font-size: 1.1em;
+        }
+        .time-col {
+            color: #c0392b;
+            font-weight: bold;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            text-align: left;
+        }
+
+        /* Cell Types */
+        .lecture {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 8px;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .practical {
+            background-color: #d1ecf1;
+            border-left: 5px solid #17a2b8;
+            padding: 8px;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .type { display: block; font-size: 0.8em; color: #666; text-transform: uppercase; margin-bottom: 4px; }
+        .subject { display: block; font-weight: bold; font-size: 1.2em; color: #2c3e50; margin-bottom: 4px; }
+        .room { display: block; font-size: 0.95em; color: #555; }
+        .empty { color: #ccc; }
+
+        .legend {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            font-size: 0.9em;
+        }
+        .legend-item { display: flex; align-items: center; gap: 8px; }
+        .dot { width: 15px; height: 15px; border-radius: 50%; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>SEMESTER 4 SCHEDULE</h1>
+        <h2 id="group-title">Select a Group</h2>
+        <h3>University of Constantine 2</h3>
+    </header>
+
+    <div class="controls">
+        <label for="group-select" style="margin-right: 10px; font-weight: bold;">Select Group:</label>
+        <select id="group-select" onchange="renderTimetable()">
+            <option value="1">Group 1</option>
+            <option value="2">Group 2</option>
+            <option value="3">Group 3</option>
+            <option value="4" selected>Group 4</option>
+            <option value="5">Group 5</option>
+            <option value="6">Group 6</option>
+            <option value="7">Group 7</option>
+            <option value="8">Group 8</option>
+            <option value="9">Group 9</option>
+            <option value="10">Group 10</option>
+            <option value="11">Group 11</option>
+            <option value="12">Group 12</option>
+        </select>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Day/Time</th>
+                <th>08:30 - 10:00</th>
+                <th>10:00 - 11:30</th>
+                <th>11:30 - 13:00</th>
+                <th>13:00 - 14:30</th>
+                <th>14:30 - 16:00</th>
+            </tr>
+        </thead>
+        <tbody id="timetable-body">
+            <!-- Content filled by JS -->
+        </tbody>
+    </table>
+
+    <div class="legend">
+        <div class="legend-item">
+            <span class="dot" style="background-color: #ffc107;"></span>
+            <span>Lecture (Cours)</span>
+        </div>
+        <div class="legend-item">
+            <span class="dot" style="background-color: #17a2b8;"></span>
+            <span>TD / TP</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Data Definitions ---
+    // Lectures (Common for Sections)
+    // S1 = G1-G6, S2 = G7-G12
+    const lectures = {
+        S1: {
+            SUN_0830: { s: "AJEL", r: "Amphi A2" },
+            SUN_1130: { s: "BD", r: "Amphi A2" },
+            MON_1000: { s: "SE", r: "Amphi A2" },
+            TUE_1300: { s: "RC", r: "Amphi A2" },
+            WED_0830: { s: "TG", r: "Amphi A2" },
+            THU_1000: { s: "DAW", r: "Amphi A2" },
+            THU_1300: { s: "GL", r: "Amphi A2" } // Inferred from G4 correction "A2 C GL"
+        },
+        S2: {
+            SUN_1000: { s: "AJEL", r: "Amphi A2" },
+            MON_0830: { s: "SE", r: "Amphi A2" },
+            TUE_1130: { s: "BD", r: "Amphi A2" },
+            TUE_1430: { s: "RC", r: "Amphi A2" },
+            WED_1000: { s: "TG", r: "Amphi A2" },
+            THU_0830: { s: "DAW", r: "Amphi A2" },
+            THU_1130: { s: "GL", r: "Amphi A2" }
+        }
+    };
+
+    // Specific TD/TP Sessions (Exceptions/Additions)
+    // Based on Partition Logic:
+    // Block A (S1 Lecture): G7-G12 have Work.
+    // Block B (S2 Lecture): G1-G6 have Work.
+    const groupData = {
+        1: { // S1
+            "SUN_1000": { s: "TG", r: "S40" },
+            "MON_0830": { s: "??", r: "S??" }, // Missing in image, likely S33 or S38
+            "MON_1300": { s: "??", r: "TP?" }, 
+            "TUE_1000": { s: "??", r: "S??" },
+            "WED_1130": { s: "GL", r: "S39" }, 
+            "THU_0830": { s: "BD", r: "TPX" }, // Inferred
+        },
+        2: { // S1
+            "SUN_1000": { s: "GL", r: "S39" },
+            "MON_0830": { s: "RC", r: "S40" },
+            "MON_1430": { s: "SE", r: "G2" }, // S40 G2 SE?
+            "TUE_0830": { s: "BD", r: "TP6" },
+            "TUE_1130": { s: "BD", r: "S40" },
+            "TUE_1430": { s: "DAW", r: "TP6" },
+            "WED_1000": { s: "RC", r: "TP9" },
+            "THU_0830": { s: "TG", r: "SX" } 
+        },
+        3: { // S1
+            "MON_0830": { s: "RC", r: "TP6" },
+            "TUE_0830": { s: "BD", r: "TP9" },
+            "TUE_1130": { s: "DAW", r: "TP6" },
+            "TUE_1430": { s: "TG", r: "SX" },
+            "WED_1000": { s: "GL", r: "S39" },
+            "THU_0830": { s: "SE", r: "TP9" }, // Inferred
+            "THU_1130": { s: "BD", r: "S29" }
+        },
+        4: { // S1 (Verified from Handwriting)
+            "SUN_1000": { s: "DAW", r: "TP6" },
+            "MON_0830": { s: "SE", r: "TP9" },
+            "MON_1300": { s: "RC", r: "TP6" },
+            "TUE_1130": { s: "TG", r: "SX" },
+            "TUE_1430": { s: "GL", r: "S39" },
+            "WED_1000": { s: "RC", r: "SX" },
+            "WED_1300": { s: "BD", r: "S39" },
+            "THU_1130": { s: "BD", r: "TP9" },
+            "SUN_1430": { s: "SE", r: "S33" }
+        },
+        5: { // S1
+            "MON_0830": { s: "GL", r: "S39" },
+            "TUE_1130": { s: "BD", r: "TP9" },
+            "WED_1000": { s: "RC", r: "TP6" },
+            "THU_0830": { s: "BD", r: "S31" },
+            "THU_1130": { s: "TG", r: "SX" } 
+        },
+        6: { // S1
+            "SUN_1000": { s: "SE", r: "TP9" }, 
+            "MON_0830": { s: "DAW", r: "TP4" },
+            "MON_1130": { s: "GL", r: "S39" }, 
+            "TUE_1430": { s: "BD", r: "TP9" },
+            "WED_1000": { s: "SE", r: "S40" },
+            "THU_0830": { s: "TG", r: "SY" } // Inferred
+        },
+        // --- S2 Groups (G7-G12) ---
+        7: { // S2
+            "SUN_0830": { s: "DAW", r: "TP6" },
+            "SUN_1130": { s: "RC", r: "S40" },
+            "MON_1000": { s: "RC", r: "TP6" },
+            "TUE_0830": { s: "TG", r: "S31" },
+            "WED_0830": { s: "SE", r: "S40" },
+            "WED_1130": { s: "BD", r: "S38" },
+            "THU_1000": { s: "SE", r: "TP9" }
+        },
+        8: { // S2
+            "SUN_0830": { s: "TG", r: "S40" },
+            "MON_1000": { s: "RC", r: "S40" },
+            "TUE_1300": { s: "GL", r: "S39" },
+            "THU_1000": { s: "BD", r: "TPX" },
+            "THU_1300": { s: "SE", r: "TP5" }
+        },
+        9: { // S2
+            "SUN_0830": { s: "BD", r: "TP4" },
+            "SUN_1130": { s: "DAW", r: "TP6" },
+            "MON_1000": { s: "GL", r: "S39" },
+            "TUE_1300": { s: "TG", r: "SX" },
+            "WED_1130": { s: "SE", r: "S40" }, // Likely S40 based on Wed 11:30 G9 SE
+            "THU_1300": { s: "BD", r: "S29" }
+        },
+        10: { // S2
+            "SUN_0830": { s: "GL", r: "S39" },
+            "SUN_1130": { s: "SE", r: "TP9" }, 
+            "MON_1000": { s: "BD", r: "S38" },
+            "TUE_1300": { s: "DAW", r: "TP6" },
+            "WED_0830": { s: "RC", r: "TP6" },
+            "THU_1000": { s: "TG", r: "SX" }, 
+            "THU_1300": { s: "BD", r: "TP9" }
+        },
+        11: { // S2
+            "SUN_0830": { s: "BD", r: "S38" },
+            "SUN_1130": { s: "SE", r: "S39" }, 
+            "MON_1000": { s: "SE", r: "TP9" }, 
+            "TUE_0830": { s: "BD", r: "S40" }, // S40 G11 BD? Or is it S40 G?
+            "TUE_1300": { s: "BD", r: "TP9" },
+            "WED_0830": { s: "GL", r: "S39" }, 
+            "THU_1300": { s: "TG", r: "SX" } // Wait, overlap G11/G12? SX G11 TG
+        },
+        12: { // S2
+            "SUN_0830": { s: "SE", r: "TP9" },
+            "SUN_1130": { s: "BD", r: "S33" },
+            "MON_1000": { s: "DAW", r: "TP4" },
+            "WED_0830": { s: "RC", r: "TP9" },
+            "THU_1000": { s: "GL", r: "S29" } // ?? Inferred
+        }
+    };
+
+    // --- Logic ---
+    function renderTimetable() {
+        const groupSelect = document.getElementById('group-select');
+        const groupId = parseInt(groupSelect.value);
+        const section = groupId <= 6 ? 'S1' : 'S2';
+        
+        document.getElementById('group-title').innerText = `Timetable for Group ${groupId} (${section})`;
+        
+        const tbody = document.getElementById('timetable-body');
+        tbody.innerHTML = ''; // Clear existing
+        
+        const days = ['SUN', 'MON', 'TUE', 'WED', 'THU'];
+        const times = ['0830', '1000', '1130', '1300', '1430'];
+        const displayTimes = ['08:30 - 10:00', '10:00 - 11:30', '11:30 - 13:00', '13:00 - 14:30', '14:30 - 16:00'];
+
+        days.forEach(day => {
+            const tr = document.createElement('tr');
+            
+            // Day Header
+            const tdDay = document.createElement('td');
+            tdDay.className = 'time-col';
+            tdDay.innerText = day;
+            tr.appendChild(tdDay);
+
+            times.forEach(time => {
+                const td = document.createElement('td');
+                const key = `${day}_${time}`;
+                
+                // 1. Check for Specific Group Session (High Priority)
+                let session = null;
+                if (groupData[groupId] && groupData[groupId][key]) {
+                    session = groupData[groupId][key];
+                    session.type = 'practical';
+                    session.label = 'TD/TP';
+                }
+                
+                // 2. If no specific session, check for Section Lecture
+                if (!session && lectures[section][key]) {
+                    session = lectures[section][key];
+                    session.type = 'lecture';
+                    session.label = `Lecture (${section})`;
+                }
+
+                // Note: If both exist? Usually Group Session overrides, or it's a conflict.
+                // We prioritize Specific Group Data.
+
+                if (session) {
+                    td.innerHTML = `
+                        <div class="${session.type}">
+                            <span class="type">${session.label}</span>
+                            <span class="subject">${session.s}</span>
+                            <span class="room">${session.r}</span>
+                        </div>
+                    `;
+                } else {
+                    td.className = 'empty';
+                    td.innerText = '-';
+                }
+                
+                tr.appendChild(td);
+            });
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Initial render
+    renderTimetable();
+</script>
+
+</body>
+</html>
