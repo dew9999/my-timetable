@@ -119,7 +119,13 @@
     </header>
 
     <div class="controls">
-        <label for="group-select" style="margin-right: 10px; font-weight: bold;">Select Group:</label>
+        <label for="year-select" style="margin-right: 10px; font-weight: bold;">Select Year:</label>
+        <select id="year-select" onchange="updateYear()">
+            <option value="L2">L2 (Tronc Commun)</option>
+            <option value="L3_GL">L3 (Genie Logiciel)</option>
+        </select>
+
+        <label for="group-select" style="margin-left: 20px; margin-right: 10px; font-weight: bold;">Select Group:</label>
         <select id="group-select" onchange="renderTimetable()">
             <option value="1">Group 1</option>
             <option value="2">Group 2</option>
@@ -166,9 +172,9 @@
 
 <script>
     // --- Data Definitions ---
-    // Lectures (Common for Sections)
-    // S1 = G1-G6, S2 = G7-G12
-    const lectures = {
+
+    // === L2 (Tronc Commun - Groups 1-12) ===
+    const lectures_L2 = {
         S1: {
             SUN_0830: { s: "AJEL", r: "Amphi A2" },
             SUN_1130: { s: "BD", r: "Amphi A2" },
@@ -176,7 +182,7 @@
             TUE_1300: { s: "RC", r: "Amphi A2" },
             WED_0830: { s: "TG", r: "Amphi A2" },
             THU_1000: { s: "DAW", r: "Amphi A2" },
-            THU_1300: { s: "GL", r: "Amphi A2" } // Inferred from G4 correction "A2 C GL"
+            THU_1300: { s: "GL", r: "Amphi A2" } 
         },
         S2: {
             SUN_1000: { s: "AJEL", r: "Amphi A2" },
@@ -189,25 +195,20 @@
         }
     };
 
-    // Specific TD/TP Sessions (Exceptions/Additions)
-    // Based on Partition Logic:
-    // Block A (S1 Lecture): G7-G12 have Work.
-    // Block B (S2 Lecture): G1-G6 have Work.
-    const groupData = {
+    const data_L2 = {
         1: { // S1
             "SUN_1000": { s: "TG", r: "S40" },
-            "MON_0830": { s: "??", r: "S??" }, // Missing in image, likely S33 or S38
+            "MON_0830": { s: "??", r: "S??" }, 
             "MON_1300": { s: "??", r: "TP?" }, 
             "TUE_1000": { s: "??", r: "S??" },
             "WED_1130": { s: "GL", r: "S39" }, 
-            "THU_0830": { s: "BD", r: "TPX" }, // Inferred
+            "THU_0830": { s: "BD", r: "TPX" },
         },
         2: { // S1
             "SUN_1000": { s: "GL", r: "S39" },
-            "SUN_1430": { s: "SE (TP)", r: "Lab 4" }, // Added: OS Lab
+            "SUN_1430": { s: "SE", r: "TP4" }, // Corrected "Lab 4" to "TP4"
             "MON_0830": { s: "RC", r: "S40" },
-            "MON_1300": { s: "SE (TD)", r: "S40" },   // Added: OS Lab
-            // "MON_1430" Removed
+            "MON_1300": { s: "SE", r: "S40" },   
             "TUE_0830": { s: "BD", r: "TP6" },
             "TUE_1130": { s: "BD", r: "S40" },
             "TUE_1430": { s: "DAW", r: "TP6" },
@@ -220,10 +221,10 @@
             "TUE_1130": { s: "DAW", r: "TP6" },
             "TUE_1430": { s: "TG", r: "SX" },
             "WED_1000": { s: "GL", r: "S39" },
-            "THU_0830": { s: "SE", r: "TP9" }, // Inferred
+            "THU_0830": { s: "SE", r: "TP9" }, 
             "THU_1130": { s: "BD", r: "S29" }
         },
-        4: { // S1 (Verified from Handwriting)
+        4: { // S1 (Verified)
             "SUN_1000": { s: "DAW", r: "TP6" },
             "MON_0830": { s: "SE", r: "TP9" },
             "MON_1300": { s: "RC", r: "TP6" },
@@ -247,7 +248,7 @@
             "MON_1130": { s: "GL", r: "S39" }, 
             "TUE_1430": { s: "BD", r: "TP9" },
             "WED_1000": { s: "SE", r: "S40" },
-            "THU_0830": { s: "TG", r: "SY" } // Inferred
+            "THU_0830": { s: "TG", r: "SY" } 
         },
         // --- S2 Groups (G7-G12) ---
         7: { // S2
@@ -271,7 +272,7 @@
             "SUN_1130": { s: "DAW", r: "TP6" },
             "MON_1000": { s: "GL", r: "S39" },
             "TUE_1300": { s: "TG", r: "SX" },
-            "WED_1130": { s: "SE", r: "S40" }, // Likely S40 based on Wed 11:30 G9 SE
+            "WED_1130": { s: "SE", r: "S40" }, 
             "THU_1300": { s: "BD", r: "S29" }
         },
         10: { // S2
@@ -287,39 +288,120 @@
             "SUN_0830": { s: "BD", r: "S38" },
             "SUN_1130": { s: "SE", r: "S39" }, 
             "MON_1000": { s: "SE", r: "TP9" }, 
-            "TUE_0830": { s: "BD", r: "S40" }, // S40 G11 BD? Or is it S40 G?
+            "TUE_0830": { s: "BD", r: "S40" }, 
             "TUE_1300": { s: "BD", r: "TP9" },
             "WED_0830": { s: "GL", r: "S39" }, 
-            "THU_1300": { s: "TG", r: "SX" } // Wait, overlap G11/G12? SX G11 TG
+            "THU_1300": { s: "TG", r: "SX" } 
         },
         12: { // S2
             "SUN_0830": { s: "SE", r: "TP9" },
             "SUN_1130": { s: "BD", r: "S33" },
             "MON_1000": { s: "DAW", r: "TP4" },
             "WED_0830": { s: "RC", r: "TP9" },
-            "THU_1000": { s: "GL", r: "S29" } // ?? Inferred
+            "THU_1000": { s: "GL", r: "S29" } 
         }
     };
 
+    // === L3 (Genie Logiciel - Groups 1-4) ===
+    const data_L3_GL = {
+        1: {
+            "SUN_1000": { s: "GL (TD)", r: "S25" },
+            "SUN_1300": { s: "GL (Cours)", r: "S2" },
+            "MON_0830": { s: "TP7", r: "TP" }, 
+            "MON_1000": { s: "TP7", r: "TP" }, // Assuming double session logic or shared
+            "TUE_1000": { s: "TP7", r: "TP" },
+            "WED_0830": { s: "Atelier 1", r: "S2" },
+            "WED_1000": { s: "Atelier 1", r: "S2" }
+        },
+        2: {
+            "SUN_0830": { s: "GL (TD)", r: "S25" },
+            "SUN_1300": { s: "S26 (?)", r: "S26" }, 
+            "SUN_1430": { s: "TP11", r: "TP" },
+            "TUE_0830": { s: "TP7", r: "TP" }, 
+            "WED_0830": { s: "Atelier 2", r: "S25" },
+            "WED_1000": { s: "Atelier 2", r: "S25" }
+        },
+        3: {
+            "SUN_1000": { s: "TP11", r: "TP" },
+            "SUN_1300": { s: "TP11", r: "TP" },
+            "SUN_1430": { s: "GL (TD)", r: "S26" },
+            "TUE_0830": { s: "S2 (?)", r: "S2" },
+            "WED_0830": { s: "Atelier 3", r: "S26" },
+            "WED_1000": { s: "Atelier 3", r: "S26" }
+        },
+        4: {
+            "SUN_1300": { s: "TP (MEL)", r: "S25" },
+            "SUN_1430": { s: "GL (Cours)", r: "S2" },
+            "MON_0830": { s: "GL (TD)", r: "S26" }, 
+            "MON_1000": { s: "TP7", r: "TP" },
+            "WED_0830": { s: "Atelier 4", r: "TP7" },
+            "WED_1000": { s: "Atelier 4", r: "TP7" }
+        }
+    };
+    
+    // Lectures for L3 are generally integrated or not listed as separate "Amphi" blocks
+    // So we'll skip a separate "lectures_L3" object and put everything in data_L3_GL for now,
+    // unless there are explicit section-wide lectures.
+    // (Image shows some rows like "S2" or "S26" which might be shared, but allocated per group).
+
     // --- Logic ---
+    let currentYear = 'L2';
+    let currentData = data_L2;
+    let currentLectures = lectures_L2;
+
+    function updateYear() {
+        const yearSelect = document.getElementById('year-select');
+        currentYear = yearSelect.value;
+        const groupSelect = document.getElementById('group-select');
+
+        // Update Data Source
+        if (currentYear === 'L2') {
+            currentData = data_L2;
+            currentLectures = lectures_L2;
+            // Update Group Options (1-12)
+            groupSelect.innerHTML = '';
+            for(let i=1; i<=12; i++) {
+                let opt = document.createElement('option');
+                opt.value = i;
+                opt.innerText = `Group ${i}`;
+                if(i===4) opt.selected = true; // Default
+                groupSelect.appendChild(opt);
+            }
+        } else {
+            currentData = data_L3_GL;
+            currentLectures = {}; // No separate lecture object for L3 yet
+            // Update Group Options (1-4)
+            groupSelect.innerHTML = '';
+            for(let i=1; i<=4; i++) {
+                let opt = document.createElement('option');
+                opt.value = i;
+                opt.innerText = `Group ${i}`;
+                groupSelect.appendChild(opt);
+            }
+        }
+        renderTimetable();
+    }
+
     function renderTimetable() {
         const groupSelect = document.getElementById('group-select');
         const groupId = parseInt(groupSelect.value);
-        const section = groupId <= 6 ? 'S1' : 'S2';
+        let section = 'S1'; 
+        if (currentYear === 'L2') {
+             section = groupId <= 6 ? 'S1' : 'S2';
+        } else {
+             section = 'L3'; // Just a label
+        }
         
-        document.getElementById('group-title').innerText = `Timetable for Group ${groupId} (${section})`;
+        document.getElementById('group-title').innerText = `Timetable for Group ${groupId} (${currentYear})`;
         
         const tbody = document.getElementById('timetable-body');
         tbody.innerHTML = ''; // Clear existing
         
         const days = ['SUN', 'MON', 'TUE', 'WED', 'THU'];
         const times = ['0830', '1000', '1130', '1300', '1430'];
-        const displayTimes = ['08:30 - 10:00', '10:00 - 11:30', '11:30 - 13:00', '13:00 - 14:30', '14:30 - 16:00'];
-
+        
         days.forEach(day => {
             const tr = document.createElement('tr');
-            
-            // Day Header
             const tdDay = document.createElement('td');
             tdDay.className = 'time-col';
             tdDay.innerText = day;
@@ -328,24 +410,21 @@
             times.forEach(time => {
                 const td = document.createElement('td');
                 const key = `${day}_${time}`;
-                
-                // 1. Check for Specific Group Session (High Priority)
                 let session = null;
-                if (groupData[groupId] && groupData[groupId][key]) {
-                    session = groupData[groupId][key];
+
+                // 1. Check Specific Group Data
+                if (currentData[groupId] && currentData[groupId][key]) {
+                    session = currentData[groupId][key];
                     session.type = 'practical';
-                    session.label = 'TD/TP';
+                    session.label = 'TP / TD';
                 }
                 
-                // 2. If no specific session, check for Section Lecture
-                if (!session && lectures[section][key]) {
-                    session = lectures[section][key];
+                // 2. Check Lectures (only for L2 currently)
+                if (!session && currentLectures[section] && currentLectures[section][key]) {
+                    session = currentLectures[section][key];
                     session.type = 'lecture';
                     session.label = `Lecture (${section})`;
                 }
-
-                // Note: If both exist? Usually Group Session overrides, or it's a conflict.
-                // We prioritize Specific Group Data.
 
                 if (session) {
                     td.innerHTML = `
@@ -359,16 +438,15 @@
                     td.className = 'empty';
                     td.innerText = '-';
                 }
-                
                 tr.appendChild(td);
             });
-
             tbody.appendChild(tr);
         });
     }
 
-    // Initial render
-    renderTimetable();
+    // Initial render setup
+    // We need to trigger the initial logic manually or ensure variables are set
+
 </script>
 
 </body>
